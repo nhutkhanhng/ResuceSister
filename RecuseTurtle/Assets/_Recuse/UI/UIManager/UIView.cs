@@ -92,7 +92,7 @@ namespace UIManager
         public delegate void OnHidden(UIPanel view);
         public OnHidden onHidden;
 
-        public virtual async UniTaskVoid Initialize() { }
+        public virtual async UniTask Initialize() { }
         public virtual async UniTask _Load()
         {
             await UniTask.WaitForEndOfFrame();
@@ -123,7 +123,7 @@ namespace UIManager
         {
             _onCompleted?.Invoke(this);
         }
-        protected abstract void Shown();
+        protected virtual void Shown() { }
         public void CanvasAlPha(float alphaValue)
         {
             _CanvasGroup.alpha = alphaValue;

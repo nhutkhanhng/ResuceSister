@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ToolKit
 {
+    [DefaultExecutionOrder(-50)]
     public class ToolBox : MonoBehaviour
     {
         [SerializeField] protected bool m_DontDestroyOnLoad = false;

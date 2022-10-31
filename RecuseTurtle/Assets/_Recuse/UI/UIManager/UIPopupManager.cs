@@ -37,7 +37,7 @@ namespace UIManager
 
             return null;
         }
-        public void Start()
+        public async UniTask Initialize()
         {
             ToolBox.Set<UIPopupManager>(this);
 

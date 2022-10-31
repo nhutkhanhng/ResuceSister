@@ -23,7 +23,7 @@ namespace UIManager
     {
         public Camera UICam;
         const string POPUP_BASE_MESSAGE = "Views/";
-        const string Expression = @"Views/{0}";
+        const string Expression = "Views/{0}";
         protected Canvas _canvas;
         public Canvas MasterCanvas { get; private set; }
 
@@ -39,8 +39,6 @@ namespace UIManager
         public async void Start()
         {
             ToolBox.Set<UIViewManager>(this);
-
-            await Initialize();
         }
         
         public async UniTask Initialize()
@@ -131,7 +129,7 @@ namespace UIManager
                     return _uiView;
                     // _uiView.Hide();
                 }
-                catch { Debug.LogError(viewName); }
+                catch {  }
             }
 
             return _uiView;
@@ -144,8 +142,11 @@ namespace UIManager
             _popupAsset.gameObject.SetActive(false);
 
             var popup = UnityEngine.Object.Instantiate((T)_ResourceRequested.asset, ViewHolder ?? this.transform);
+
+            popup.transform.name = popup.transform.name.Replace("(Clone)", string.Empty);
             popup.transform.SetAsFirstSibling();
-            await popup._Load();
+
+            await popup.Initialize();
 
 
             AddView(_ResourceRequested.asset.name, popup);
@@ -174,7 +175,8 @@ namespace UIManager
         {
             try
             {
-                var viewAsset = Resources.LoadAsync<GameObject>(string.Format(Expression, viewName));
+                var viewAsset = Resources.LoadAsync<UIView>($"Views/{viewName}");
+                    // string.Format(Expression, viewName));
 
                 await UniTask.WaitUntil(() => viewAsset.isDone == true);
                 UIView _uiView;
@@ -185,7 +187,7 @@ namespace UIManager
             }
             catch
             {
-                Debug.LogError(viewName + " F ");
+                Debug.LogError(string.Format(Expression, viewName)  + " Load asset fail");
                 return null;
             }
 
@@ -206,6 +208,20 @@ namespace UIManager
         {
             T _popup = null;
             UniTask.Action(async () => _popup = await _AsyncShowView<T>(param)).Invoke();
+        }
+        public async UniTask<UIView> _AsyncShowView(string viewName, object param = null)
+        {
+            UIView _view = await GetOrLoadView(viewName);
+            if (_view == null)
+            {
+                return null;
+            }
+
+            _view.transform.SetAsLastSibling();
+            _view.gameObject.SetActive(true);
+
+            _view.Show(param);
+            return _view;
         }
 
         public async UniTask<T> _AsyncShowView<T>(object param = null) where T : UIView
