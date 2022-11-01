@@ -5,8 +5,6 @@ using Cysharp.Threading.Tasks;
 using System.Linq;
 using System;
 using DG.Tweening;
-using NaughtyAttributes;
-using ToolKit;
 
 namespace UIManager
 {
@@ -14,6 +12,8 @@ namespace UIManager
     {
         [SerializeField] protected bool Initialized = false;
         [SerializeField] protected Transform transHolder;
+
+        [SerializeField] protected List<uiBase> allElementals = new List<uiBase>();
         protected Dictionary<string, uiBase> m_uiElements = new Dictionary<string, uiBase>();
 
         [SerializeField] protected List<string> Essentials = new List<string>();
@@ -40,6 +40,7 @@ namespace UIManager
 
             return _view;
         }
+
         public async UniTask<T> AsyncShow<T>(object param = null) where T : uiBase
         {
             T _view = await GetOrLoad<T>() as T;
@@ -61,13 +62,23 @@ namespace UIManager
             uiElement.Show(param);
         }
 
+        public async UniTask Hide<T>() where  T: uiBase
+        {
+            T ui = Get<T>() as T;
+            if (ui)
+            {
+                await Hide(ui);
+            }
+        }
         public async UniTask Hide(uiBase ui)
         {
             if (ui != null)
             {
                 ui.Hide();
                 await UniTask.WaitUntil(() => ui.Visibility == VisibilityState.NotVisible);
-                ui.gameObject.SetActive(false);
+
+                Remove(ui.gameObject.name);
+                // ui.gameObject.SetActive(false);
             }
         }
 
@@ -83,7 +94,8 @@ namespace UIManager
         {
             try
             {
-                var popupAsset = Resources.LoadAsync<T>(string.Format(Expression(), (typeof(T).ToString())));
+                Debug.LogError((typeof(T).ToString()));
+                var popupAsset = Resources.LoadAsync<T>(string.Format(Expression(), typeof(T).Name));
                 await UniTask.WaitUntil(() => popupAsset.isDone == true);
 
                 T _view = null;
@@ -93,7 +105,7 @@ namespace UIManager
             }
             catch
             {
-                Debug.LogError("find not found " + typeof(uiBase).ToString());
+                Debug.LogError("find not found " + typeof(T).ToString());
                 return null;
             }
         }
@@ -122,19 +134,19 @@ namespace UIManager
 
         protected async UniTask<uiBase> __InstanceView(ResourceRequest _ResourceRequested)
         {
-            var _popupAsset = ((uiBase)_ResourceRequested.asset);
-            var popup = UnityEngine.Object.Instantiate((uiBase)_ResourceRequested.asset, transHolder ?? this.transform);
+            var _uiAsset = ((uiBase)_ResourceRequested.asset);
+            var _uiComp = UnityEngine.Object.Instantiate((uiBase)_ResourceRequested.asset, transHolder ?? this.transform);
 
-            popup.gameObject.SetActive(false);
-            popup.transform.name = popup.transform.name.Replace("(Clone)", string.Empty);
-            popup.transform.SetAsFirstSibling();
+            _uiComp.gameObject.SetActive(false);
+            _uiComp.transform.name = _uiComp.transform.name.Replace("(Clone)", string.Empty);
+            _uiComp.transform.SetAsFirstSibling();
 
-            await popup.Initialize();
+            _uiComp.Initialize().Forget();
+            allElementals.Add(_uiComp);
 
+            Add(_ResourceRequested.asset.name, _uiComp);
 
-            Add(_ResourceRequested.asset.name, popup);
-
-            return popup;
+            return _uiComp;
         }
 
         public async UniTask<T> GetOrLoad<T>() where T : uiBase
@@ -149,13 +161,11 @@ namespace UIManager
                 try
                 {
                     _view = await Load<T>() as T;
-                    await _view.Initialize();
-
-                    Add(_view.GetType().ToString(), _view);
-
 
                     if (_view)
                         _view.gameObject.SetActive(false);
+
+                    Add(_view.GetType().ToString(), _view);
 
                     return _view;
                     // _uiView.Hide();
@@ -177,14 +187,10 @@ namespace UIManager
                 try
                 {
                     _uiView = await Load(uiName);
-                    await _uiView.Initialize();
-
-                    Add(uiName, _uiView);
-
-
                     if (_uiView)
                         _uiView.gameObject.SetActive(false);
 
+                    Add(uiName, _uiView);
                     return _uiView;
                     // _uiView.Hide();
                 }
@@ -206,7 +212,7 @@ namespace UIManager
 
             return null;
         }
-        protected uiBase Get(string name)
+        public uiBase Get(string name)
         {
             if (!m_uiElements.ContainsKey(name)) return null;
             return m_uiElements[name];
@@ -214,14 +220,21 @@ namespace UIManager
 
         protected void Remove(string key)
         {
-            if (!m_uiElements.ContainsKey(key)) return;
-            Destroy(m_uiElements[key].gameObject);
-            m_uiElements.Remove(key);
+            if (m_uiElements.ContainsKey(key))
+            {
+                
+                allElementals.Remove(m_uiElements[key]);
+                Destroy(m_uiElements[key].gameObject);
+
+                m_uiElements.Remove(key);
+            }
         }
         protected void Add(string key, uiBase view)
         {
-            if (m_uiElements.ContainsKey(key)) m_uiElements[key] = view;
-            else m_uiElements.Add(key, view);
+            if (m_uiElements.ContainsKey(key))
+                m_uiElements[key] = view;
+            else
+                m_uiElements.Add(key, view);
         }
 
         // =====================================================================================

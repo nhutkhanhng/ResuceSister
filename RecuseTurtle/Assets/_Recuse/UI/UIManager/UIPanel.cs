@@ -29,12 +29,13 @@ namespace UIManager
     }
     public class UIPanel : MonoBehaviour
     {
+        protected UIController uiController => ToolBox.Get<UIController>();
         public object Parameter { get; protected set; }
         [SerializeField] public float fadeInTime = .1f, fadeOutTime = .1f;
         [SerializeField] public CanvasGroup _CanvasGroup { get; protected set; }
 
         /// <summary> Internal variable that keeps track of this UIView's visibility state (Visible, NotVisible, Hiding or Showing) </summary>
-        private VisibilityState m_visibility = VisibilityState.NotVisible;
+        [SerializeField] protected VisibilityState m_visibility = VisibilityState.NotVisible;
         public VisibilityState Visibility
         {
             get { return m_visibility; }
@@ -59,7 +60,7 @@ namespace UIManager
         public delegate void OnHidden(UIPanel view);
         public OnHidden onHidden;
 
-        public virtual async UniTask Initialize() { }
+        public virtual async UniTask Initialize() { await UniTask.Yield(); }
         public virtual async UniTask _Load()
         {
             await UniTask.WaitForEndOfFrame();
@@ -78,7 +79,7 @@ namespace UIManager
                 this.Parameter = param;
                 Shown();
                 onShow?.Invoke(this);
-                this.transform.DOScale(1, fadeInTime);
+                // this.transform.DOScale(1, fadeInTime);
                 DOVirtual.DelayedCall(this.fadeInTime, () =>
                 {
                     m_visibility = VisibilityState.Visible;
@@ -110,7 +111,7 @@ namespace UIManager
                     _raycast.enabled = false;
                 
                 OnHide();
-                this.transform.DOScale(0, fadeOutTime);
+                // this.transform.DOScale(0, fadeOutTime);
                 DOVirtual.DelayedCall(fadeOutTime, () =>
                 {
                     this.Visibility = VisibilityState.NotVisible;

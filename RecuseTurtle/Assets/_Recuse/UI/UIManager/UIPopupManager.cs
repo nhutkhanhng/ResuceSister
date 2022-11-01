@@ -5,8 +5,6 @@ using Cysharp.Threading.Tasks;
 using System.Linq;
 using System;
 using DG.Tweening;
-using NaughtyAttributes;
-using ToolKit;
 
 namespace UIManager
 {

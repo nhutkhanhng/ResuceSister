@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ToolKit
+namespace UIManager
 {
     [DefaultExecutionOrder(-50)]
     public class ToolBox : MonoBehaviour
