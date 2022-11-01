@@ -10,15 +10,6 @@ using ToolKit;
 
 namespace UIManager
 {
-    public class VIEW_NAME
-    {
-        public const string LOADING = "Loading";
-        public const string WIN = "Win";
-        public const string LOSE = "Lose";
-        public const string LEVELCHOOSEN = "LevelChoosen";
-        public const string HUD = "Hud";
-    }
-
     public class UIViewManager : MonoBehaviour
     {
         public Camera UICam;
@@ -36,11 +27,7 @@ namespace UIManager
         [SerializeField] protected List<string> defaultInit = new List<string>();
 
         public bool Initialized = false;
-        public async void Start()
-        {
-            ToolBox.Set<UIViewManager>(this);
-        }
-        
+
         public async UniTask Initialize()
         {
             Initialized = false;
@@ -195,12 +182,12 @@ namespace UIManager
         }
         public async UniTaskVoid ShowLoadingForProcess(UniTask process)
         {
-            ShowView(VIEW_NAME.LOADING, true);
+            var  _view = await _AsyncShowView<UIViewLoading>();
 
             await process;
 
             await UniTask.Delay(TimeSpan.FromSeconds(1f), ignoreTimeScale: false);
-            await HideView(VIEW_NAME.LOADING, true);
+            await HideView(_view);
         }
 
 
@@ -344,13 +331,13 @@ namespace UIManager
 
             return null;
         }
-        private void AddView(string key, UIView view)
+        protected void AddView(string key, UIView view)
         {
             if (m_views.ContainsKey(key)) m_views[key] = view;
             else m_views.Add(key, view);
         }
 
-        private void RemoveView(string key)
+        protected void RemoveView(string key)
         {
             if (!m_views.ContainsKey(key)) return;
             Destroy(m_views[key].gameObject);
