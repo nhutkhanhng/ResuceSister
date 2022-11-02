@@ -31,11 +31,11 @@ namespace UIManager
     {
         protected UIController uiController => ToolBox.Get<UIController>();
         public object Parameter { get; protected set; }
-        [SerializeField] public float fadeInTime = .1f, fadeOutTime = .1f;
+        [SerializeField] public float fadeInTime = .01f, fadeOutTime = .01f;
         [SerializeField] public CanvasGroup _CanvasGroup { get; protected set; }
 
         /// <summary> Internal variable that keeps track of this UIView's visibility state (Visible, NotVisible, Hiding or Showing) </summary>
-        [SerializeField] protected VisibilityState m_visibility = VisibilityState.NotVisible;
+        [ReadOnly] [SerializeField] protected VisibilityState m_visibility = VisibilityState.NotVisible;
         public VisibilityState Visibility
         {
             get { return m_visibility; }

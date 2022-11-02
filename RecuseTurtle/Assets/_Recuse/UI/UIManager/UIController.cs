@@ -140,5 +140,81 @@ namespace UIManager
 
             subPanel.Show();
         }
+
+        public async UniTask<T> Load<T>(Transform root = null, object param = null) where T : UIPanel
+        {
+            UIPanel _view = null;
+            string _uiName = typeof(T).Name;
+
+            if (typeof(T).IsSubclassOf(typeof(UIView)))
+            {
+                _view = await viewManager.GetOrLoad(_uiName);
+            }
+            else
+            if (typeof(T).IsSubclassOf(typeof(UIPopup)))
+            {
+                _view = await popupManager.GetOrLoad(_uiName);                
+            }
+            else
+            // UIPanel is base class. Please check end of queue.
+            if (typeof(T).IsSubclassOf(typeof(UIPanel)))
+            {
+                _view = await _panelManager.GetOrLoad(_uiName);
+            }
+
+            if (_view && root)
+                _view.transform.SetParent(root);
+
+            return _view as T;
+        }
+        public async UniTask<T> Show<T>(object param = null, System.Action<T> result = null) where T : UIPanel
+        {
+            UIPanel _view = null;
+            string _uiName = typeof(T).Name;
+
+            if (typeof(T).IsSubclassOf(typeof(UIView)))
+            {
+                _view = await viewManager.GetOrLoad(_uiName);
+            }
+            else
+            if (typeof(T).IsSubclassOf(typeof(UIPopup)))
+            {
+                _view = await popupManager.GetOrLoad(_uiName);
+            }
+            else
+            // UIPanel is base class. Please check end of queue.
+            if (typeof(T).IsSubclassOf(typeof(UIPanel)))
+            {
+                _view = await _panelManager.GetOrLoad(_uiName);
+            }
+
+            result?.Invoke(_view as T);
+
+            _view.Show(param);
+
+            return _view as T;
+        }
+
+        public async UniTask Hide<T>(object param = null, System.Action<T> result = null) where T : UIPanel
+        {
+            UIPanel _view = null;
+            string _uiName = typeof(T).Name;
+
+            if (typeof(T).IsSubclassOf(typeof(UIView)))
+            {
+                await viewManager.Hide(_uiName);
+            }
+            else
+            if (typeof(T).IsSubclassOf(typeof(UIPopup)))
+            {
+                await popupManager.Hide(_uiName);
+            }
+            else
+            // UIPanel is base class. Please check end of queue.
+            if (typeof(T).IsSubclassOf(typeof(UIPanel)))
+            {
+                await _panelManager.Hide(_uiName);
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace UIManager
         [SerializeField] protected bool Initialized = false;
         [SerializeField] protected Transform transHolder;
 
-        [SerializeField] protected List<uiBase> allElementals = new List<uiBase>();
+        [ReadOnly] [SerializeField] protected List<uiBase> allElementals = new List<uiBase>();
         protected Dictionary<string, uiBase> m_uiElements = new Dictionary<string, uiBase>();
 
         [SerializeField] protected List<string> Essentials = new List<string>();
@@ -62,6 +62,14 @@ namespace UIManager
             uiElement.Show(param);
         }
 
+        public async UniTask Hide(string name)
+        {
+            uiBase ui = Get(name) as uiBase;
+            if (ui)
+            {
+                await Hide(ui);
+            }
+        }
         public async UniTask Hide<T>() where  T: uiBase
         {
             T ui = Get<T>() as T;
@@ -93,8 +101,7 @@ namespace UIManager
         protected async UniTask<T> Load<T>() where T : uiBase
         {
             try
-            {
-                Debug.LogError((typeof(T).ToString()));
+            {                
                 var popupAsset = Resources.LoadAsync<T>(string.Format(Expression(), typeof(T).Name));
                 await UniTask.WaitUntil(() => popupAsset.isDone == true);
 
@@ -138,10 +145,12 @@ namespace UIManager
             var _uiComp = UnityEngine.Object.Instantiate((uiBase)_ResourceRequested.asset, transHolder ?? this.transform);
 
             _uiComp.gameObject.SetActive(false);
+            await _uiComp.Initialize();
+            await UniTask.Yield();
+
             _uiComp.transform.name = _uiComp.transform.name.Replace("(Clone)", string.Empty);
             _uiComp.transform.SetAsFirstSibling();
 
-            _uiComp.Initialize().Forget();
             allElementals.Add(_uiComp);
 
             Add(_ResourceRequested.asset.name, _uiComp);
@@ -267,7 +276,7 @@ namespace UIManager
     {
         protected override string Expression()
         {
-            return "Panles/{0}";
+            return "Panels/{0}";
         }
     }
 
