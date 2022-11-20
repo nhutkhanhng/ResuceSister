@@ -51,9 +51,9 @@ namespace UIManager
         {
             ToolBox.Set<UIController>(this);
 
-            _viewManager    = _viewManager    ?? ToolBox.Get<UIViewLoader>();
-            _popupManager   = _popupManager   ?? ToolBox.Get<UIPopupLoader>();
-            _panelManager   = _panelManager   ?? ToolBox.Get<UIPanelLoader>();
+            _viewManager = _viewManager ?? ToolBox.Get<UIViewLoader>();
+            _popupManager = _popupManager ?? ToolBox.Get<UIPopupLoader>();
+            _panelManager = _panelManager ?? ToolBox.Get<UIPanelLoader>();
 
             await _panelManager.Initialize();
 
@@ -67,7 +67,7 @@ namespace UIManager
             _ShowPopup<T>(param, result).Forget();
         }
 
-        public async UniTask<T> _ShowPopup<T>( object param = null, System.Action<T> result = null) where T : UIPopup
+        public async UniTask<T> _ShowPopup<T>(object param = null, System.Action<T> result = null) where T : UIPopup
         {
             T _view = await popupManager.AsyncShow<T>(param);
 
@@ -153,7 +153,7 @@ namespace UIManager
             else
             if (typeof(T).IsSubclassOf(typeof(UIPopup)))
             {
-                _view = await popupManager.GetOrLoad(_uiName);                
+                _view = await popupManager.GetOrLoad(_uiName);
             }
             else
             // UIPanel is base class. Please check end of queue.

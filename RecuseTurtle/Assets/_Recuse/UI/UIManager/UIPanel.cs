@@ -126,5 +126,13 @@ namespace UIManager
         }
 
         public virtual void Hidden() { }
+
+        protected async UniTask WaitToCall(UniTask task, System.Action callback)
+        {
+            await task;
+            await UniTask.Yield();
+
+            callback?.Invoke();
+        }
     }
 }

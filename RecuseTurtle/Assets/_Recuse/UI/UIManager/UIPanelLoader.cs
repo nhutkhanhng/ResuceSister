@@ -145,7 +145,7 @@ namespace UIManager
             var _uiComp = UnityEngine.Object.Instantiate((uiBase)_ResourceRequested.asset, transHolder ?? this.transform);
 
             _uiComp.gameObject.SetActive(false);
-            await _uiComp.Initialize();
+            _uiComp.Initialize().Forget();
             await UniTask.Yield();
 
             _uiComp.transform.name = _uiComp.transform.name.Replace("(Clone)", string.Empty);
